@@ -1,0 +1,25 @@
+{
+  "name": "lucky-clover-image-filter",
+  "version": "0.0.1",
+  "description": "",
+  "cordova": {
+    "id": "cordova-plugin-sts-image-filter",
+    "platforms": [
+      "ios"
+    ]
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/ttdat89/cordova-plugin-lucky-clover-image-filter.git"
+  },
+  "keywords": [
+    "ecosystem:cordova",
+    "cordova-ios"
+  ],
+  "author": "Dat Tran",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ttdat89/cordova-plugin-lucky-clover-image-filter/issues"
+  },
+  "homepage": "https://github.com/ttdat89/cordova-plugin-lucky-clover-image-filter#readme"
+}

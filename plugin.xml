@@ -1,0 +1,19 @@
+<?xml version='1.0' encoding='utf-8'?>
+<plugin id="cordova-plugin-sts-image-filter" version="0.0.1" xmlns="http://apache.org/cordova/ns/plugins/1.0"
+        xmlns:android="http://schemas.android.com/apk/res/android">
+    <name>ImageFilter</name>
+    <js-module name="ImageFilter" src="www/ImageFilter.js">
+        <clobbers target="ImageFilter"/>
+    </js-module>
+    <platform name="ios">
+        <config-file parent="/*" target="config.xml">
+            <feature name="ImageFilter">
+                <param name="ios-package" value="ImageFilter"/>
+            </feature>
+        </config-file>
+        <header-file src="src/ios/ImageFilter.h" />
+        <source-file src="src/ios/ImageFilter.m"/>
+        <framework src="CoreGraphics.framework" />
+        <framework src="CoreImage.framework" />
+    </platform>
+</plugin>
