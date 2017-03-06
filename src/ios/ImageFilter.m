@@ -54,7 +54,7 @@ static NSString* toBase64(NSData* data) {
     NSURL *pathUrl = [NSURL URLWithString:path];
     path = pathUrl.path;
     NSString *filterType = [command argumentAtIndex:1 withDefault:nil];
-    if (!path.length && !filterType.length) {
+    if (path.length && filterType.length) {
         if (![currentImagePath isEqualToString:path]) {
             currentImagePath = path;
             currentEditingImage = [UIImage imageWithContentsOfFile:path];
