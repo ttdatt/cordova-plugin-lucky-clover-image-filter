@@ -51,6 +51,8 @@ static NSString* toBase64(NSData* data) {
 
 - (void)validateInput:(CDVInvokedUrlCommand *)command {
     NSString *path = [command argumentAtIndex:0 withDefault:nil];
+    NSURL *pathUrl = [NSURL URLWithString:path];
+    path = pathUrl.path;
     NSString *filterType = [command argumentAtIndex:1 withDefault:nil];
     if (!path.length && !filterType.length) {
         if (![currentImagePath isEqualToString:path]) {
