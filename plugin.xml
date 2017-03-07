@@ -11,9 +11,18 @@
                 <param name="ios-package" value="ImageFilter"/>
             </feature>
         </config-file>
-        <header-file src="src/ios/ImageFilter.h" />
+        <header-file src="src/ios/ImageFilter.h"/>
         <source-file src="src/ios/ImageFilter.m"/>
-        <framework src="CoreGraphics.framework" />
-        <framework src="CoreImage.framework" />
+        <framework src="CoreGraphics.framework"/>
+        <framework src="CoreImage.framework"/>
+    </platform>
+    <platform name="android">
+        <config-file parent="/*" target="res/xml/config.xml">
+            <feature name="ImageFilter">
+                <param name="android-package" value="ImageFilter"/>
+            </feature>
+        </config-file>
+        <config-file parent="/*" target="AndroidManifest.xml"></config-file>
+        <source-file src="src/android/ImageFilter.java" target-dir="src/cordova-plugin-sts-image-filter/ImageFilter"/>
     </platform>
 </plugin>

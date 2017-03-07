@@ -62,22 +62,25 @@ static NSString* toBase64(NSData* data) {
     }
 }
 
-- (void)applyChromeEffect:(CDVInvokedUrlCommand*)command {
+- (void)applyEffect:(CDVInvokedUrlCommand*)command {
     [self validateInput:command];
     
     NSString *filterType = [command argumentAtIndex:1 withDefault:nil];
-    NSData *data = [self filterImage:currentEditingImage filter:filterType];
+    NSNumber *compressionQuality = [command argumentAtIndex:2 withDefault:@(0.5)];
+
+    NSData *data = [self filterImage:currentEditingImage filter:filterType compressionQuality:compressionQuality];
+
     CDVPluginResult *result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:toBase64(data)];
     [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
 }
 
-- (NSData *)filterImage:(UIImage *)image filter:(NSString *)filterType {
+- (NSData *)filterImage:(UIImage *)image filter:(NSString *)filterType compressionQuality:(NSNumber *)quality {
     @autoreleasepool {
         CIImage *ciImage = [[CIImage alloc] initWithImage:image];
         ciImage = [ciImage imageByApplyingFilter:filterType withInputParameters:nil];
         CGImageRef ref = [context createCGImage:ciImage fromRect:ciImage.extent];
         UIImage *img = [[UIImage alloc] initWithCGImage:ref];
-        NSData *data = UIImageJPEGRepresentation(img, 0.6);
+        NSData *data = UIImageJPEGRepresentation(img, [quality floatValue]);
         return data;
     }
 }
