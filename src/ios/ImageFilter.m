@@ -12,7 +12,9 @@
 
 static CIContext *context;
 static UIImage *currentEditingImage;
+static UIImage *currentPreviewImage;
 static NSString *currentImagePath = nil;
+static CGSize screenSize;
 
 //CIPhotoEffectChrome
 //CIPhotoEffectFade
@@ -27,7 +29,7 @@ static NSString* toBase64(NSData* data) {
     SEL s1 = NSSelectorFromString(@"cdv_base64EncodedString");
     SEL s2 = NSSelectorFromString(@"base64EncodedString");
     SEL s3 = NSSelectorFromString(@"base64EncodedStringWithOptions:");
-    
+
     if ([data respondsToSelector:s1]) {
         NSString* (*func)(id, SEL) = (void *)[data methodForSelector:s1];
         return func(data, s1);
@@ -44,9 +46,11 @@ static NSString* toBase64(NSData* data) {
 
 - (void)pluginInitialize {
     [super pluginInitialize];
-    
+
     EAGLContext *eaglCxt = [[EAGLContext alloc] initWithAPI:kEAGLRenderingAPIOpenGLES2];
     context = [CIContext contextWithEAGLContext:eaglCxt];
+
+    screenSize = [[UIScreen mainScreen] bounds].size;
 }
 
 - (void)validateInput:(CDVInvokedUrlCommand *)command {
@@ -58,17 +62,38 @@ static NSString* toBase64(NSData* data) {
         if (![currentImagePath isEqualToString:path]) {
             currentImagePath = path;
             currentEditingImage = [UIImage imageWithContentsOfFile:path];
+
+            float ratio = screenSize.width / currentEditingImage.size.width;
+            CGSize newSize = CGSizeMake(currentEditingImage.size.width * ratio, currentEditingImage.size.height * ratio);
+            UIGraphicsBeginImageContextWithOptions(newSize, NO, 0.0);
+            [currentEditingImage drawInRect:CGRectMake(0, 0, newSize.width, newSize.height)];
+            currentPreviewImage = UIGraphicsGetImageFromCurrentImageContext();
+            UIGraphicsEndImageContext();
         }
     }
 }
 
 - (void)applyEffect:(CDVInvokedUrlCommand*)command {
     [self validateInput:command];
-    
+
     NSString *filterType = [command argumentAtIndex:1 withDefault:nil];
     NSNumber *compressionQuality = [command argumentAtIndex:2 withDefault:@(0.5)];
 
     [self filterImage:currentEditingImage filter:filterType compressionQuality:compressionQuality completion:^(NSData *data) {
+        CDVPluginResult *result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:toBase64(data)];
+        dispatch_sync(dispatch_get_main_queue(), ^{
+            [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
+        });
+    }];
+}
+
+- (void)applyEffectForReview:(CDVInvokedUrlCommand*)command {
+    [self validateInput:command];
+
+    NSString *filterType = [command argumentAtIndex:1 withDefault:nil];
+    NSNumber *compressionQuality = [command argumentAtIndex:2 withDefault:@(0.5)];
+
+    [self filterImage:currentPreviewImage filter:filterType compressionQuality:compressionQuality completion:^(NSData *data) {
         CDVPluginResult *result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:toBase64(data)];
         dispatch_sync(dispatch_get_main_queue(), ^{
             [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];

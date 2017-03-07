@@ -12,5 +12,6 @@
 @interface ImageFilter : CDVPlugin
 
 - (void)applyEffect:(CDVInvokedUrlCommand*)command;
+- (void)applyEffectForReview:(CDVInvokedUrlCommand*)command;
 
 @end
