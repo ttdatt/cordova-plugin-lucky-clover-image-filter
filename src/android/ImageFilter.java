@@ -1,4 +1,4 @@
-packet cordova.plugin.sts.image.filter;
+package cordova.plugin.sts.image.filter;
 
 import android.content.Context;
 import android.graphics.Bitmap;
