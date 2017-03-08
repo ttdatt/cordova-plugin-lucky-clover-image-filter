@@ -1,4 +1,3 @@
-package cordova-plugin-sts-image-filter;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -114,6 +113,13 @@ public class ImageFilter extends CordovaPlugin {
     }
 
     private void applyEffect(String path, String filterType, double compressQuality, CallbackContext callbackContext) {
+        this.validateInput(path, filterType);
+
+        Bitmap bmp = this.applyAgedEffect();
+        this.processPicture(bmp, (float)compressQuality, JPEG);
+    }
+
+    private void applyEffectForReview(String path, String filterType, double compressQuality, CallbackContext callbackContext) {
         this.validateInput(path, filterType);
 
         Bitmap bmp = this.applyAgedEffect();
