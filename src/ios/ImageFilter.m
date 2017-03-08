@@ -128,6 +128,10 @@ static NSString* toBase64(NSData* data) {
         return [self applyRosyEffect:image];
     else if ([effect isEqualToString:@"intense"])
         return [self applyIntenseEffect:image];
+    else if ([effect isEqualToString:@"warm"])
+        return [self applyWarmEffect:image];
+    else if ([effect isEqualToString:@"light"])
+        return [self applyLightEffect:image];
     else
         return nil;
 }
