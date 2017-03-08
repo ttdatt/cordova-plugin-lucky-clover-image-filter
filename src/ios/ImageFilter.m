@@ -29,7 +29,7 @@ static NSString* toBase64(NSData* data) {
     SEL s1 = NSSelectorFromString(@"cdv_base64EncodedString");
     SEL s2 = NSSelectorFromString(@"base64EncodedString");
     SEL s3 = NSSelectorFromString(@"base64EncodedStringWithOptions:");
-
+    
     if ([data respondsToSelector:s1]) {
         NSString* (*func)(id, SEL) = (void *)[data methodForSelector:s1];
         return func(data, s1);
@@ -46,10 +46,10 @@ static NSString* toBase64(NSData* data) {
 
 - (void)pluginInitialize {
     [super pluginInitialize];
-
+    
     EAGLContext *eaglCxt = [[EAGLContext alloc] initWithAPI:kEAGLRenderingAPIOpenGLES2];
     context = [CIContext contextWithEAGLContext:eaglCxt];
-
+    
     screenSize = [[UIScreen mainScreen] bounds].size;
 }
 
@@ -62,7 +62,7 @@ static NSString* toBase64(NSData* data) {
         if (![currentImagePath isEqualToString:path]) {
             currentImagePath = path;
             currentEditingImage = [UIImage imageWithContentsOfFile:path];
-
+            
             float ratio = screenSize.width / currentEditingImage.size.width;
             CGSize newSize = CGSizeMake(currentEditingImage.size.width * ratio, currentEditingImage.size.height * ratio);
             UIGraphicsBeginImageContextWithOptions(newSize, NO, 0.0);
@@ -75,10 +75,10 @@ static NSString* toBase64(NSData* data) {
 
 - (void)applyEffect:(CDVInvokedUrlCommand*)command {
     [self validateInput:command];
-
+    
     NSString *filterType = [command argumentAtIndex:1 withDefault:nil];
     NSNumber *compressionQuality = [command argumentAtIndex:2 withDefault:@(0.5)];
-
+    
     [self filterImage:currentEditingImage filter:filterType compressionQuality:compressionQuality completion:^(NSData *data) {
         CDVPluginResult *result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:toBase64(data)];
         dispatch_sync(dispatch_get_main_queue(), ^{
@@ -89,10 +89,10 @@ static NSString* toBase64(NSData* data) {
 
 - (void)applyEffectForReview:(CDVInvokedUrlCommand*)command {
     [self validateInput:command];
-
+    
     NSString *filterType = [command argumentAtIndex:1 withDefault:nil];
     NSNumber *compressionQuality = [command argumentAtIndex:2 withDefault:@(0.5)];
-
+    
     [self filterImage:currentPreviewImage filter:filterType compressionQuality:compressionQuality completion:^(NSData *data) {
         CDVPluginResult *result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:toBase64(data)];
         dispatch_sync(dispatch_get_main_queue(), ^{
@@ -105,9 +105,9 @@ static NSString* toBase64(NSData* data) {
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
         @autoreleasepool {
             CIImage *ciImage = [[CIImage alloc] initWithImage:image];
-
+            
             ciImage = [self applySelectedEffect:ciImage effect:filterType];
-
+            
             CGImageRef ref = [context createCGImage:ciImage fromRect:ciImage.extent];
             UIImage *img = [[UIImage alloc] initWithCGImage:ref];
             NSData *data = UIImageJPEGRepresentation(img, [quality floatValue]);
@@ -202,6 +202,34 @@ static NSString* toBase64(NSData* data) {
                         blue:@(0.8505f)];
 }
 
+- (CIImage *)applyWarmEffect:(CIImage *)img {
+    return [self applyFilter:img
+                  saturation:@(1.45876f)
+                  brightness:nil
+                    contrast:nil
+                       gamma:nil
+                    exposure:nil
+                     sharpen:nil
+                         hue:nil
+                         red:nil
+                       green:nil
+                        blue:nil];
+}
+
+- (CIImage *)applyLightEffect:(CIImage *)img {
+    return [self applyFilter:img
+                  saturation:@(0.99484f)
+                  brightness:@(-0.005155f)
+                    contrast:@(0.8866f)
+                       gamma:@(0.99484f)
+                    exposure:@(1.1134f)
+                     sharpen:nil
+                         hue:nil
+                         red:@(0.99227f)
+                       green:nil
+                        blue:nil];
+}
+
 - (CIImage *)applyNoEffect:(CIImage *)img {
     return [self applyFilter:img
                   saturation:nil
@@ -217,9 +245,9 @@ static NSString* toBase64(NSData* data) {
 }
 
 - (CIImage *)applyFilter:(CIImage*)image saturation:(NSNumber *)saturation brightness:(NSNumber*)brightness contrast:(NSNumber*)contrast gamma:(NSNumber*)gamma exposure:(NSNumber*)exposure sharpen:(NSNumber*)sharpen hue:(NSNumber*)hue red:(NSNumber*)red green:(NSNumber*)green blue:(NSNumber*)blue {
-
+    
     CIImage *result = image;
-
+    
     if (saturation)
         result = [self applySaturation:result saturation:saturation];
     if (brightness)
@@ -240,7 +268,7 @@ static NSString* toBase64(NSData* data) {
         result = [self applyGreen:result value:green];
     if (blue)
         result = [self applyBlue:result value:blue];
-
+    
     return result;
 }
 
