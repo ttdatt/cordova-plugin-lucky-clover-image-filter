@@ -17,6 +17,8 @@
         <framework src="CoreImage.framework"/>
     </platform>
     <platform name="android">
+        <framework src="org.apache.commons:commons-lang3:3.4" />
+        <framework src="jp.co.cyberagent.android.gpuimage:gpuimage-library:1.4.1" />
         <config-file parent="/*" target="res/xml/config.xml">
             <feature name="ImageFilter">
                 <param name="android-package" value="ImageFilter"/>
