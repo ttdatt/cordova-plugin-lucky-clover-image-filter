@@ -25,6 +25,6 @@
             </feature>
         </config-file>
         <config-file parent="/*" target="AndroidManifest.xml"></config-file>
-        <source-file src="src/android/ImageFilter.java" target-dir="src/cordova-plugin-sts-image-filter/ImageFilter"/>
+        <source-file src="src/android/ImageFilter.java" target-dir="src/cordova/plugin/sts/image/filter/ImageFilter"/>
     </platform>
 </plugin>
