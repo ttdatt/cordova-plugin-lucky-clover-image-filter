@@ -18,14 +18,6 @@ static NSString *currentImagePath = nil;
 static NSString *base64Image = nil;
 static CGSize screenSize;
 
-//CIPhotoEffectChrome
-//CIPhotoEffectFade
-//CIPhotoEffectInstant
-//CIPhotoEffectMono
-//CIPhotoEffectNoir
-//CIPhotoEffectProcess
-//CIPhotoEffectTonal
-//CIPhotoEffectTransfer
 
 static NSString* toBase64(NSData* data) {
     SEL s1 = NSSelectorFromString(@"cdv_base64EncodedString");
@@ -65,9 +57,9 @@ static UIImage * base64ToImage(NSString *base64Image) {
     NSURL *pathUrl = [NSURL URLWithString:pathOrData];
     pathOrData = pathUrl.path;
     NSString *filterType = [command argumentAtIndex:1 withDefault:nil];
-    NSNumber *isBase64Image = [command argumentAtIndex:3 withDefault:false];
+    NSNumber *isBase64Image = [command argumentAtIndex:3 withDefault:@(0)];
 
-    if (isBase64Image)
+    if ([isBase64Image intValue] == 0)
     {
         if (pathOrData.length && filterType.length && ![currentImagePath isEqualToString:pathOrData]) {
             currentImagePath = pathOrData;
@@ -87,7 +79,7 @@ static UIImage * base64ToImage(NSString *base64Image) {
             UIGraphicsEndImageContext();
         }
     }
-    else {
+    else if ([isBase64Image intValue] == 1) {
         if (pathOrData.length && filterType.length && ![pathOrData isEqualToString:base64Image]) {
             base64Image = pathOrData;
             currentEditingImage = base64ToImage(pathOrData);
@@ -105,6 +97,10 @@ static UIImage * base64ToImage(NSString *base64Image) {
             currentThumbnailImage = UIGraphicsGetImageFromCurrentImageContext();
             UIGraphicsEndImageContext();
         }
+    }
+    else {
+        CDVPluginResult *result = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR];
+        [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
     }
 }
 
