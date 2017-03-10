@@ -98,7 +98,7 @@ public class ImageFilter extends CordovaPlugin {
             String path = args.getString(0);
             String filterType = args.getString(1);
             double compressQuality = args.getDouble(2);
-            boolean isBase64Image = args.getBoolean(3);
+            int isBase64Image = args.getInt(3);
 
             if (action.equals("applyEffect"))
                 this.applyEffect(path, filterType, compressQuality, isBase64Image, callbackContext);
@@ -108,9 +108,9 @@ public class ImageFilter extends CordovaPlugin {
         return false;
     }
 
-    private void validateInput(String pathOrData, String filterType, boolean isBase64Image) {
+    private void validateInput(String pathOrData, String filterType, int isBase64Image) {
 
-        if (!isBase64Image) {
+        if (isBase64Image == 0) {
             if (!StringUtils.isEmpty(pathOrData) && !StringUtils.isEmpty(filterType)
                     && !pathOrData.equals(currentImagePath)) {
 
@@ -120,12 +120,12 @@ public class ImageFilter extends CordovaPlugin {
                 currentEditingImage = BitmapFactory.decodeFile(pathOrData);
                 editingGPUImage.setImage(currentEditingImage);
 
-                float ratio = screenSize.getWidth() / currentEditingImage.getWidth();
+                float ratio = (float)screenSize.getWidth() / (float)currentEditingImage.getWidth();
                 Size newSize = new Size(Math.round(currentEditingImage.getWidth() * ratio), Math.round(currentEditingImage.getHeight() * ratio));
                 currentPreviewImage = Bitmap.createScaledBitmap(currentEditingImage, newSize.getWidth(), newSize.getHeight(), false);
                 previewGPUImage.setImage(currentPreviewImage);
             }
-        } else {
+        } else if (isBase64Image == 1) {
             if (!StringUtils.isEmpty(pathOrData) && !StringUtils.isEmpty(filterType)
                     && !pathOrData.equals(base64Image)) {
                 base64Image = pathOrData;
@@ -133,15 +133,18 @@ public class ImageFilter extends CordovaPlugin {
                 currentEditingImage = base64ToBitmap(pathOrData);
                 editingGPUImage.setImage(currentEditingImage);
 
-                float ratio = screenSize.getWidth() / currentEditingImage.getWidth();
+                float ratio = (float)screenSize.getWidth() / (float)currentEditingImage.getWidth();
                 Size newSize = new Size(Math.round(currentEditingImage.getWidth() * ratio), Math.round(currentEditingImage.getHeight() * ratio));
                 currentPreviewImage = Bitmap.createScaledBitmap(currentEditingImage, newSize.getWidth(), newSize.getHeight(), false);
                 previewGPUImage.setImage(currentPreviewImage);
             }
         }
+        else {
+            this.callbackContext.error("something wrong while passing isBase64Image value");
+        }
     }
 
-    private void applyEffect(String pathOrData, final String filterType, final double compressQuality, boolean isBase64Image, CallbackContext callbackContext) {
+    private void applyEffect(String pathOrData, final String filterType, final double compressQuality, int isBase64Image, CallbackContext callbackContext) {
         this.validateInput(pathOrData, filterType, isBase64Image);
 
         new Thread(new Runnable() {
@@ -156,7 +159,7 @@ public class ImageFilter extends CordovaPlugin {
         }).start();
     }
 
-    private void applyEffectForReview(String pathOrData, final String filterType, final double compressQuality, boolean isBase64Image, CallbackContext callbackContext) {
+    private void applyEffectForReview(String pathOrData, final String filterType, final double compressQuality, int isBase64Image, CallbackContext callbackContext) {
         this.validateInput(pathOrData, filterType, isBase64Image);
 
         new Thread(new Runnable() {
