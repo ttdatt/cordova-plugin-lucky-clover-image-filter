@@ -177,16 +177,16 @@ static UIImage * base64ToImage(NSString *base64Image) {
 
 - (UIImage *)applyAgedEffect:(UIImage *)img {
     return [self applyFilter:img
-                  saturation:@(0.4072f)
-                  brightness:@(-0.1495f)
-                    contrast:@(0.768f)
-                       gamma:nil
-                    exposure:@(0.8866f)
-                     sharpen:nil
+                  saturation:@(0.00516)
+                  brightness:@(0.04124)
+                    contrast:@(0.8763)
+                       gamma:@(0.7474)
+                    exposure:@(0.1804)
+                     sharpen:@(1.0103)
                          hue:nil
-                         red:@(0.8222165f)
-                       green:@(0.6469f)
-                        blue:@(0.5232f)];
+                         red:@(0.7835)
+                       green:@(0.719)
+                        blue:@(0.616)];
 }
 
 - (UIImage *)applyBlackWhiteEffect:(UIImage *)img {
@@ -194,9 +194,9 @@ static UIImage * base64ToImage(NSString *base64Image) {
                   saturation:@(0.0f)
                   brightness:nil
                     contrast:nil
-                       gamma:nil
-                    exposure:@(0.64433f)
-                     sharpen:@(0.8763f)
+                       gamma:@(1.2282)
+                    exposure:@(0.2062)
+                     sharpen:@(0.268)
                          hue:nil
                          red:nil
                        green:nil
@@ -247,28 +247,28 @@ static UIImage * base64ToImage(NSString *base64Image) {
 
 - (UIImage *)applyWarmEffect:(UIImage *)img {
     return [self applyFilter:img
-                  saturation:@(1.45876f)
-                  brightness:nil
-                    contrast:nil
-                       gamma:nil
-                    exposure:nil
+                  saturation:@(1.2577)
+                  brightness:@(-0.085)
+                    contrast:@(0.964)
+                       gamma:@(0.8763)
+                    exposure:@(0.4536)
                      sharpen:nil
                          hue:nil
-                         red:nil
-                       green:nil
-                        blue:nil];
+                         red:@(0.83)
+                       green:@(0.8092)
+                        blue:@(0.7938)];
 }
 
 - (UIImage *)applyLightEffect:(UIImage *)img {
     return [self applyFilter:img
-                  saturation:@(0.99484f)
-                  brightness:@(-0.005155f)
-                    contrast:@(0.8866f)
-                       gamma:@(0.99484f)
-                    exposure:@(1.1134f)
-                     sharpen:nil
+                  saturation:@(1.4484)
+                  brightness:@(-0.0592)
+                    contrast:@(0.7629)
+                       gamma:@(0.7835)
+                    exposure:@(0.4124)
+                     sharpen:@(-0.0825)
                          hue:nil
-                         red:@(0.99227f)
+                         red:nil
                        green:nil
                         blue:nil];
 }
