@@ -18,4 +18,3 @@
 - (void)applyEffectForThumbnail:(CDVInvokedUrlCommand *)command;
 
 @end
-

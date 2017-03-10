@@ -1,5 +1,6 @@
 //
 //  ImageFilter.m
+//  HelloWorld
 //
 //  Created by dat tran on 3/3/17.
 //
@@ -14,7 +15,17 @@ static UIImage *currentEditingImage;
 static UIImage *currentPreviewImage;
 static UIImage *currentThumbnailImage;
 static NSString *currentImagePath = nil;
+static NSString *base64Image = nil;
 static CGSize screenSize;
+
+//CIPhotoEffectChrome
+//CIPhotoEffectFade
+//CIPhotoEffectInstant
+//CIPhotoEffectMono
+//CIPhotoEffectNoir
+//CIPhotoEffectProcess
+//CIPhotoEffectTonal
+//CIPhotoEffectTransfer
 
 static NSString* toBase64(NSData* data) {
     SEL s1 = NSSelectorFromString(@"cdv_base64EncodedString");
@@ -35,6 +46,11 @@ static NSString* toBase64(NSData* data) {
     }
 }
 
+static UIImage * base64ToImage(NSString *base64Image) {
+    NSData *imageData = [[NSData alloc] initWithBase64EncodedString:base64Image options:0];
+    return [UIImage imageWithData:imageData];
+}
+
 - (void)pluginInitialize {
     [super pluginInitialize];
 
@@ -45,28 +61,50 @@ static NSString* toBase64(NSData* data) {
 }
 
 - (void)validateInput:(CDVInvokedUrlCommand *)command {
-    NSString *path = [command argumentAtIndex:0 withDefault:nil];
-    NSURL *pathUrl = [NSURL URLWithString:path];
-    path = pathUrl.path;
+    NSString *pathOrData = [command argumentAtIndex:0 withDefault:nil];
+    NSURL *pathUrl = [NSURL URLWithString:pathOrData];
+    pathOrData = pathUrl.path;
     NSString *filterType = [command argumentAtIndex:1 withDefault:nil];
-    NSNumber *thumbnailRatio = [command argumentAtIndex:3 withDefault:@(0.1f)];
+    NSNumber *isBase64Image = [command argumentAtIndex:3 withDefault:false];
 
-    if (path.length && filterType.length && ![currentImagePath isEqualToString:path]) {
-        currentImagePath = path;
-        currentEditingImage = [UIImage imageWithContentsOfFile:path];
+    if (isBase64Image)
+    {
+        if (pathOrData.length && filterType.length && ![currentImagePath isEqualToString:pathOrData]) {
+            currentImagePath = pathOrData;
+            currentEditingImage = [UIImage imageWithContentsOfFile:pathOrData];
 
-        float ratio = screenSize.width / currentEditingImage.size.width;
-        CGSize newSize = CGSizeMake(currentEditingImage.size.width * ratio, currentEditingImage.size.height * ratio);
-        UIGraphicsBeginImageContextWithOptions(newSize, NO, 0.0);
-        [currentEditingImage drawInRect:CGRectMake(0, 0, newSize.width, newSize.height)];
-        currentPreviewImage = UIGraphicsGetImageFromCurrentImageContext();
-        UIGraphicsEndImageContext();
+            float ratio = screenSize.width / currentEditingImage.size.width;
+            CGSize newSize = CGSizeMake(currentEditingImage.size.width * ratio, currentEditingImage.size.height * ratio);
+            UIGraphicsBeginImageContextWithOptions(newSize, NO, 0.0);
+            [currentEditingImage drawInRect:CGRectMake(0, 0, newSize.width, newSize.height)];
+            currentPreviewImage = UIGraphicsGetImageFromCurrentImageContext();
+            UIGraphicsEndImageContext();
 
-        CGSize thumbnailSize = CGSizeMake(currentPreviewImage.size.width * [thumbnailRatio floatValue], currentPreviewImage.size.height * [thumbnailRatio floatValue]);
-        UIGraphicsBeginImageContextWithOptions(thumbnailSize, NO, 0.0);
-        [currentPreviewImage drawInRect:CGRectMake(0, 0, thumbnailSize.width, thumbnailSize.height)];
-        currentThumbnailImage = UIGraphicsGetImageFromCurrentImageContext();
-        UIGraphicsEndImageContext();
+            CGSize thumbnailSize = CGSizeMake(currentPreviewImage.size.width * 0.2f, currentPreviewImage.size.height * 0.2f);
+            UIGraphicsBeginImageContextWithOptions(thumbnailSize, NO, 0.0);
+            [currentPreviewImage drawInRect:CGRectMake(0, 0, thumbnailSize.width, thumbnailSize.height)];
+            currentThumbnailImage = UIGraphicsGetImageFromCurrentImageContext();
+            UIGraphicsEndImageContext();
+        }
+    }
+    else {
+        if (pathOrData.length && filterType.length && ![pathOrData isEqualToString:base64Image]) {
+            base64Image = pathOrData;
+            currentEditingImage = base64ToImage(pathOrData);
+
+            float ratio = screenSize.width / currentEditingImage.size.width;
+            CGSize newSize = CGSizeMake(currentEditingImage.size.width * ratio, currentEditingImage.size.height * ratio);
+            UIGraphicsBeginImageContextWithOptions(newSize, NO, 0.0);
+            [currentEditingImage drawInRect:CGRectMake(0, 0, newSize.width, newSize.height)];
+            currentPreviewImage = UIGraphicsGetImageFromCurrentImageContext();
+            UIGraphicsEndImageContext();
+
+            CGSize thumbnailSize = CGSizeMake(currentPreviewImage.size.width * 0.2f, currentPreviewImage.size.height * 0.2f);
+            UIGraphicsBeginImageContextWithOptions(thumbnailSize, NO, 0.0);
+            [currentPreviewImage drawInRect:CGRectMake(0, 0, thumbnailSize.width, thumbnailSize.height)];
+            currentThumbnailImage = UIGraphicsGetImageFromCurrentImageContext();
+            UIGraphicsEndImageContext();
+        }
     }
 }
 
