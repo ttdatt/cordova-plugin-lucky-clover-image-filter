@@ -53,9 +53,12 @@ public class ImageFilter extends CordovaPlugin {
     private static final int PNG = 1;                   // Take a picture of type PNG
 
     private static String currentImagePath;
+    private static String base64Image;
     private static Bitmap currentPreviewImage;
     private static Bitmap currentEditingImage;
     private static GPUImage editingGPUImage;
+    private static GPUImage previewGPUImage;
+
     private GLSurfaceView glSurfaceView;
     private static Size screenSize;
 
@@ -67,7 +70,7 @@ public class ImageFilter extends CordovaPlugin {
     protected void pluginInitialize() {
         super.pluginInitialize();
 
-        context = this.cordova.getActivity().getApplicationContext();
+        context = this.cordova.getActivity();
 
         DisplayMetrics displayMetrics = new DisplayMetrics();
         this.cordova.getActivity().getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
@@ -77,7 +80,8 @@ public class ImageFilter extends CordovaPlugin {
 
         glSurfaceView = new GLSurfaceView(context);
         editingGPUImage = new GPUImage(context);
-        editingGPUImage.setGLSurfaceView(glSurfaceView);
+        previewGPUImage = new GPUImage(context);
+//        editingGPUImage.setGLSurfaceView(glSurfaceView);
     }
 
     @Override
@@ -90,80 +94,121 @@ public class ImageFilter extends CordovaPlugin {
 //            this.coolMethod(message, callbackContext);
             return true;
         }
-        if (action.equals("applyEffect")) {
+        if (action.equals("applyEffect") || action.equals("applyEffectForReview")) {
             String path = args.getString(0);
             String filterType = args.getString(1);
             double compressQuality = args.getDouble(2);
-            this.applyEffect(path, filterType, compressQuality, callbackContext);
+            boolean isBase64Image = args.getBoolean(3);
+
+            if (action.equals("applyEffect"))
+                this.applyEffect(path, filterType, compressQuality, isBase64Image, callbackContext);
+            else if (action.equals("applyEffectForReview"))
+                this.applyEffectForReview(path, filterType, compressQuality, isBase64Image, callbackContext);
         }
         return false;
     }
 
-    private void validateInput(String path, String filterType) {
+    private void validateInput(String pathOrData, String filterType, boolean isBase64Image) {
 
-        if (!StringUtils.isEmpty(path) && !StringUtils.isEmpty(filterType)
-                && !currentImagePath.equals(path)) {
-            currentImagePath = path;
-            currentEditingImage = BitmapFactory.decodeFile(path);
-            editingGPUImage.setImage(currentEditingImage);
+        if (!isBase64Image) {
+            if (!StringUtils.isEmpty(pathOrData) && !StringUtils.isEmpty(filterType)
+                    && !pathOrData.equals(currentImagePath)) {
 
-            float ratio = screenSize.getWidth() / currentEditingImage.getWidth();
-            Size newSize = new Size(Math.round(currentEditingImage.getWidth() * ratio), Math.round(currentEditingImage.getHeight() * ratio));
-            currentPreviewImage = Bitmap.createScaledBitmap(currentEditingImage, newSize.getWidth(), newSize.getHeight(), false);
+                pathOrData = pathOrData.substring(7);
+                currentImagePath = pathOrData;
+
+                currentEditingImage = BitmapFactory.decodeFile(pathOrData);
+                editingGPUImage.setImage(currentEditingImage);
+
+                float ratio = screenSize.getWidth() / currentEditingImage.getWidth();
+                Size newSize = new Size(Math.round(currentEditingImage.getWidth() * ratio), Math.round(currentEditingImage.getHeight() * ratio));
+                currentPreviewImage = Bitmap.createScaledBitmap(currentEditingImage, newSize.getWidth(), newSize.getHeight(), false);
+                previewGPUImage.setImage(currentPreviewImage);
+            }
+        } else {
+            if (!StringUtils.isEmpty(pathOrData) && !StringUtils.isEmpty(filterType)
+                    && !pathOrData.equals(base64Image)) {
+                base64Image = pathOrData;
+
+                currentEditingImage = base64ToBitmap(pathOrData);
+                editingGPUImage.setImage(currentEditingImage);
+
+                float ratio = screenSize.getWidth() / currentEditingImage.getWidth();
+                Size newSize = new Size(Math.round(currentEditingImage.getWidth() * ratio), Math.round(currentEditingImage.getHeight() * ratio));
+                currentPreviewImage = Bitmap.createScaledBitmap(currentEditingImage, newSize.getWidth(), newSize.getHeight(), false);
+                previewGPUImage.setImage(currentPreviewImage);
+            }
         }
     }
 
-    private void applyEffect(String path, String filterType, double compressQuality, CallbackContext callbackContext) {
-        this.validateInput(path, filterType);
+    private void applyEffect(String pathOrData, final String filterType, final double compressQuality, boolean isBase64Image, CallbackContext callbackContext) {
+        this.validateInput(pathOrData, filterType, isBase64Image);
 
-        Bitmap bmp = this.applyAgedEffect();
-        this.processPicture(bmp, (float)compressQuality, JPEG);
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                Bitmap bmp = null;
+                if (filterType.equals("aged"))
+                    bmp = applyAgedEffect(editingGPUImage);
+
+                processPicture(bmp, (float) compressQuality, JPEG);
+            }
+        }).start();
     }
 
-    private void applyEffectForReview(String path, String filterType, double compressQuality, CallbackContext callbackContext) {
-        this.validateInput(path, filterType);
+    private void applyEffectForReview(String pathOrData, final String filterType, final double compressQuality, boolean isBase64Image, CallbackContext callbackContext) {
+        this.validateInput(pathOrData, filterType, isBase64Image);
 
-        Bitmap bmp = this.applyAgedEffect();
-        this.processPicture(bmp, (float)compressQuality, JPEG);
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                Bitmap bmp = null;
+                if (filterType.equals("aged"))
+                    bmp = applyAgedEffect(previewGPUImage);
+
+                processPicture(bmp, (float) compressQuality, JPEG);
+            }
+        }).start();
     }
 
-    private Bitmap applyAgedEffect() {
-        GPUImageSaturationFilter saturationFilter = new GPUImageSaturationFilter(1.0f);
-        saturationFilter.setSaturation(0.4072f);
-        GPUImageBrightnessFilter brightnessFilter = new GPUImageBrightnessFilter();
-        brightnessFilter.setBrightness(-0.1495f);
+    private Bitmap applyAgedEffect(GPUImage bmp) {
+        GPUImageSaturationFilter saturationFilter = new GPUImageSaturationFilter();
+        saturationFilter.setSaturation(1.26288f);
+        GPUImageGammaFilter gammaFilter = new GPUImageGammaFilter();
+        gammaFilter.setGamma(1.14433f);
         GPUImageContrastFilter contrastFilter = new GPUImageContrastFilter();
-        contrastFilter.setContrast(0.768f);
+        contrastFilter.setContrast(1.2577f);
         GPUImageExposureFilter exposureFilter = new GPUImageExposureFilter();
-        exposureFilter.setExposure(0.8866f);
-        GPUImageRGBFilter rgbFilter = new GPUImageRGBFilter();
-        rgbFilter.setRed(0.8222165f);
-        rgbFilter.setGreen(0.6469f);
-        rgbFilter.setBlue(0.5232f);
+        exposureFilter.setExposure(0.4381f);
+        GPUImageHueFilter hueFilter = new GPUImageHueFilter();
+        hueFilter.setHue(0.2758f);
+        GPUImageSharpenFilter sharpen = new GPUImageSharpenFilter();
+        sharpen.setSharpness(-0.8453f);
 
         GPUImageFilterGroup filterGroup = new GPUImageFilterGroup();
         filterGroup.addFilter(saturationFilter);
-        filterGroup.addFilter(brightnessFilter);
+        filterGroup.addFilter(gammaFilter);
         filterGroup.addFilter(contrastFilter);
         filterGroup.addFilter(exposureFilter);
-        filterGroup.addFilter(rgbFilter);
+        filterGroup.addFilter(hueFilter);
+        filterGroup.addFilter(sharpen);
 
-        editingGPUImage.setFilter(filterGroup);
-        return editingGPUImage.getBitmapWithFilterApplied();
+        bmp.setFilter(filterGroup);
+        return bmp.getBitmapWithFilterApplied();
     }
 
     public void failPicture(String err) {
         this.callbackContext.error(err);
     }
 
-    public void processPicture(Bitmap bitmap, float compressQuality, int encodingType) {
+    private void processPicture(Bitmap bitmap, float compressQuality, int encodingType) {
         ByteArrayOutputStream jpeg_data = new ByteArrayOutputStream();
         CompressFormat compressFormat = encodingType == JPEG ?
                 CompressFormat.JPEG :
                 CompressFormat.PNG;
 
         try {
-            if (bitmap.compress(compressFormat, Math.round(compressQuality * 100), jpeg_data)) {
+            if (bitmap.compress(compressFormat, Math.round(0.8f * 100), jpeg_data)) {
                 byte[] code = jpeg_data.toByteArray();
                 byte[] output = Base64.encode(code, Base64.NO_WRAP);
                 String js_out = new String(output);
@@ -176,5 +221,10 @@ public class ImageFilter extends CordovaPlugin {
             this.failPicture("Error compressing image.");
         }
         jpeg_data = null;
+    }
+
+    private Bitmap base64ToBitmap(String encodedImage) {
+        byte[] decodedString = Base64.decode(encodedImage, Base64.DEFAULT);
+        return BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
     }
 }
