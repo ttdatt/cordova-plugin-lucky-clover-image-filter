@@ -6,6 +6,9 @@
         <clobbers target="ImageFilter"/>
     </js-module>
     <platform name="ios">
+        <config-file target="*-Info.plist" parent="NSCameraUsageDescription">
+            <string>Use camera to capture image</string>
+        </config-file>
         <config-file parent="/*" target="config.xml">
             <feature name="ImageFilter">
                 <param name="ios-package" value="ImageFilter"/>
