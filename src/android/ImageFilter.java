@@ -119,7 +119,9 @@ public class ImageFilter extends CordovaPlugin {
                 pathOrData = pathOrData.substring(7);
                 currentImagePath = pathOrData;
 
-                currentEditingImage = BitmapFactory.decodeFile(pathOrData);
+                BitmapFactory.Options options = new BitmapFactory.Options();
+                options.inSampleSize = 8;
+                currentEditingImage = BitmapFactory.decodeFile(pathOrData, options);
                 editingGPUImage.setImage(currentEditingImage);
 
                 float ratio = (float) screenSize.getWidth() / (float) currentEditingImage.getWidth();
@@ -146,57 +148,49 @@ public class ImageFilter extends CordovaPlugin {
     }
 
     private void applyEffect(String pathOrData, final String filterType, final double compressQuality, int isBase64Image, CallbackContext callbackContext) {
-        this.validateInput(pathOrData, filterType, isBase64Image);
+        synchronized (this) {
+            this.validateInput(pathOrData, filterType, isBase64Image);
+            Bitmap bmp = null;
+            if (filterType.equals("aged"))
+                bmp = applyAgedEffect(editingGPUImage);
+            else if (filterType.equals("blackWhite"))
+                bmp = applyBlackWhiteEffect(editingGPUImage);
+            else if (filterType.equals("cold"))
+                bmp = applyColdEffect(editingGPUImage);
+            else if (filterType.equals("rosy"))
+                bmp = applyRosyEffect(editingGPUImage);
+            else if (filterType.equals("intense"))
+                bmp = applyIntenseEffect(editingGPUImage);
+            else if (filterType.equals("warm"))
+                bmp = applyWarmEffect(editingGPUImage);
+            else if (filterType.equals("light"))
+                bmp = applyLightEffect(editingGPUImage);
 
-//        new Thread(new Runnable() {
-//            @Override
-//            public void run() {
-                Bitmap bmp = null;
-                if (filterType.equals("aged"))
-                    bmp = applyAgedEffect(editingGPUImage);
-                else if (filterType.equals("blackWhite"))
-                    bmp = applyBlackWhiteEffect(editingGPUImage);
-                else if (filterType.equals("cold"))
-                    bmp = applyColdEffect(editingGPUImage);
-                else if (filterType.equals("rosy"))
-                    bmp = applyRosyEffect(editingGPUImage);
-                else if (filterType.equals("intense"))
-                    bmp = applyIntenseEffect(editingGPUImage);
-                else if (filterType.equals("warm"))
-                    bmp = applyWarmEffect(editingGPUImage);
-                else if (filterType.equals("light"))
-                    bmp = applyLightEffect(editingGPUImage);
-
-                processPicture(bmp, (float) compressQuality, JPEG);
-//            }
-//        }).start();
+            processPicture(bmp, (float) compressQuality, JPEG);
+        }
     }
 
     private void applyEffectForReview(String pathOrData, final String filterType, final double compressQuality, int isBase64Image, CallbackContext callbackContext) {
-        this.validateInput(pathOrData, filterType, isBase64Image);
+        synchronized (this) {
+            this.validateInput(pathOrData, filterType, isBase64Image);
+            Bitmap bmp = null;
+            if (filterType.equals("aged"))
+                bmp = applyAgedEffect(previewGPUImage);
+            else if (filterType.equals("blackWhite"))
+                bmp = applyBlackWhiteEffect(previewGPUImage);
+            else if (filterType.equals("cold"))
+                bmp = applyColdEffect(previewGPUImage);
+            else if (filterType.equals("rosy"))
+                bmp = applyRosyEffect(previewGPUImage);
+            else if (filterType.equals("intense"))
+                bmp = applyIntenseEffect(previewGPUImage);
+            else if (filterType.equals("warm"))
+                bmp = applyWarmEffect(previewGPUImage);
+            else if (filterType.equals("light"))
+                bmp = applyLightEffect(previewGPUImage);
 
-//        new Thread(new Runnable() {
-//            @Override
-//            public void run() {
-                Bitmap bmp = null;
-                if (filterType.equals("aged"))
-                    bmp = applyAgedEffect(previewGPUImage);
-                else if (filterType.equals("blackWhite"))
-                    bmp = applyBlackWhiteEffect(previewGPUImage);
-                else if (filterType.equals("cold"))
-                    bmp = applyColdEffect(previewGPUImage);
-                else if (filterType.equals("rosy"))
-                    bmp = applyRosyEffect(previewGPUImage);
-                else if (filterType.equals("intense"))
-                    bmp = applyIntenseEffect(previewGPUImage);
-                else if (filterType.equals("warm"))
-                    bmp = applyWarmEffect(previewGPUImage);
-                else if (filterType.equals("light"))
-                    bmp = applyLightEffect(previewGPUImage);
-
-                processPicture(bmp, (float) compressQuality, JPEG);
-//            }
-//        }).start();
+            processPicture(bmp, (float) compressQuality, JPEG);
+        }
     }
 
     private Bitmap applyAgedEffect(GPUImage img) {
@@ -230,8 +224,8 @@ public class ImageFilter extends CordovaPlugin {
     }
 
     private Bitmap applyColdEffect(GPUImage img) {
-        return this.applyFilter(img, NOT_AVAILABLE, NOT_AVAILABLE, NOT_AVAILABLE, NOT_AVAILABLE, NOT_AVAILABLE, NOT_AVAILABLE,
-                NOT_AVAILABLE, NOT_AVAILABLE, NOT_AVAILABLE, NOT_AVAILABLE);
+        return this.applyFilter(img, 0.3093f, -0.0722f, 0.8763f, 1.0979f, 0.9639f, NOT_AVAILABLE,
+                NOT_AVAILABLE, 0.451f, 0.6881f, NOT_AVAILABLE);
     }
 
     private Bitmap applyFilter(GPUImage img, float saturation, float brightness, float contrast, float gamma, float exposure, float sharpen, float hue,
