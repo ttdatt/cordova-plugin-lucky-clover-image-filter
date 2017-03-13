@@ -219,30 +219,30 @@ static UIImage * base64ToImage(NSString *base64Image) {
 
 - (UIImage *)applyRosyEffect:(UIImage *)img {
     return [self applyFilter:img
-                  saturation:@(0.76289f)
-                  brightness:nil
-                    contrast:nil
-                       gamma:nil
-                    exposure:@(0.58763f)
-                     sharpen:nil
+                  saturation:@(0.7526)
+                  brightness:@(-0.15722)
+                    contrast:@(0.8454)
+                       gamma:@(0.897)
+                    exposure:@(0.634)
+                     sharpen:@(-0.058)
                          hue:nil
-                         red:nil
-                       green:@(0.66495f)
-                        blue:@(0.8995f)];
+                         red:@(0.9665)
+                       green:@(0.75)
+                        blue:@(0.8428)];
 }
 
 - (UIImage *)applyIntenseEffect:(UIImage *)img {
     return [self applyFilter:img
-                  saturation:@(1.618557f)
-                  brightness:@(-0.1495f)
-                    contrast:@(0.76804f)
+                  saturation:@(2.0)
+                  brightness:nil
+                    contrast:nil
                        gamma:nil
-                    exposure:@(0.8866f)
+                    exposure:@(0.12371)
                      sharpen:nil
                          hue:nil
                          red:nil
-                       green:@(0.83247f)
-                        blue:@(0.8505f)];
+                       green:nil
+                        blue:nil];
 }
 
 - (UIImage *)applyWarmEffect:(UIImage *)img {
