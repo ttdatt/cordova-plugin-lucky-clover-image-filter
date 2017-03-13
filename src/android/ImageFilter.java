@@ -204,8 +204,8 @@ public class ImageFilter extends CordovaPlugin {
     }
 
     private Bitmap applyRosyEffect(GPUImage img) {
-        return this.applyFilter(img, 0.7526f, -0.15722f, 0.8454f, 0.897f, 0.634f, -0.058f,
-                NOT_AVAILABLE, 0.9665f, 0.75f, 0.8428f);
+        return this.applyFilter(img, 0.79897f, -0.164948f, 0.819588f, 0.881443f, 0.474227f, NOT_AVAILABLE,
+                NOT_AVAILABLE, NOT_AVAILABLE, 0.822165f, 0.876289f);
     }
 
     private Bitmap applyIntenseEffect(GPUImage img) {
@@ -224,8 +224,8 @@ public class ImageFilter extends CordovaPlugin {
     }
 
     private Bitmap applyColdEffect(GPUImage img) {
-        return this.applyFilter(img, 0.3093f, -0.0722f, 0.8763f, 1.0979f, 0.9639f, NOT_AVAILABLE,
-                NOT_AVAILABLE, 0.451f, 0.6881f, NOT_AVAILABLE);
+        return this.applyFilter(img, 0.216495f, -0.134021f, 0.85567f, 1.061856f, 0.603093f, NOT_AVAILABLE,
+                NOT_AVAILABLE, 0.708763f, 0.832474f, NOT_AVAILABLE);
     }
 
     private Bitmap applyFilter(GPUImage img, float saturation, float brightness, float contrast, float gamma, float exposure, float sharpen, float hue,
