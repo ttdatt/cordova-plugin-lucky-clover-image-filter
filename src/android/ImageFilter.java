@@ -148,24 +148,36 @@ public class ImageFilter extends CordovaPlugin {
     private void applyEffect(String pathOrData, final String filterType, final double compressQuality, int isBase64Image, CallbackContext callbackContext) {
         this.validateInput(pathOrData, filterType, isBase64Image);
 
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
+//        new Thread(new Runnable() {
+//            @Override
+//            public void run() {
                 Bitmap bmp = null;
                 if (filterType.equals("aged"))
                     bmp = applyAgedEffect(editingGPUImage);
+                else if (filterType.equals("blackWhite"))
+                    bmp = applyBlackWhiteEffect(editingGPUImage);
+                else if (filterType.equals("cold"))
+                    bmp = applyColdEffect(editingGPUImage);
+                else if (filterType.equals("rosy"))
+                    bmp = applyRosyEffect(editingGPUImage);
+                else if (filterType.equals("intense"))
+                    bmp = applyIntenseEffect(editingGPUImage);
+                else if (filterType.equals("warm"))
+                    bmp = applyWarmEffect(editingGPUImage);
+                else if (filterType.equals("light"))
+                    bmp = applyLightEffect(editingGPUImage);
 
                 processPicture(bmp, (float) compressQuality, JPEG);
-            }
-        }).start();
+//            }
+//        }).start();
     }
 
     private void applyEffectForReview(String pathOrData, final String filterType, final double compressQuality, int isBase64Image, CallbackContext callbackContext) {
         this.validateInput(pathOrData, filterType, isBase64Image);
 
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
+//        new Thread(new Runnable() {
+//            @Override
+//            public void run() {
                 Bitmap bmp = null;
                 if (filterType.equals("aged"))
                     bmp = applyAgedEffect(previewGPUImage);
@@ -183,8 +195,8 @@ public class ImageFilter extends CordovaPlugin {
                     bmp = applyLightEffect(previewGPUImage);
 
                 processPicture(bmp, (float) compressQuality, JPEG);
-            }
-        }).start();
+//            }
+//        }).start();
     }
 
     private Bitmap applyAgedEffect(GPUImage img) {
