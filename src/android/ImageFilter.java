@@ -169,6 +169,18 @@ public class ImageFilter extends CordovaPlugin {
                 Bitmap bmp = null;
                 if (filterType.equals("aged"))
                     bmp = applyAgedEffect(previewGPUImage);
+                else if (filterType.equals("blackWhite"))
+                    bmp = applyBlackWhiteEffect(previewGPUImage);
+                else if (filterType.equals("cold"))
+                    bmp = applyColdEffect(previewGPUImage);
+                else if (filterType.equals("rosy"))
+                    bmp = applyRosyEffect(previewGPUImage);
+                else if (filterType.equals("intense"))
+                    bmp = applyIntenseEffect(previewGPUImage);
+                else if (filterType.equals("warm"))
+                    bmp = applyWarmEffect(previewGPUImage);
+                else if (filterType.equals("light"))
+                    bmp = applyLightEffect(previewGPUImage);
 
                 processPicture(bmp, (float) compressQuality, JPEG);
             }
