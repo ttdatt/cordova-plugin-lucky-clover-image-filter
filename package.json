@@ -1,5 +1,5 @@
 {
-  "name": "lucky-clover-image-filter",
+  "name": "cordova-plugin-sts-image-filter",
   "version": "0.0.27",
   "description": "",
   "cordova": {

@@ -49,8 +49,10 @@ import jp.co.cyberagent.android.gpuimage.*;
 
 public class ImageFilter extends CordovaPlugin {
 
-    private static final int JPEG = 0;                  // Take a picture of type JPEG
-    private static final int PNG = 1;                   // Take a picture of type PNG
+    private static final int JPEG = 0;
+    private static final int PNG = 1;
+
+    private static final float NOT_AVAILABLE = -9999;
 
     private static String currentImagePath;
     private static String base64Image;
@@ -120,7 +122,7 @@ public class ImageFilter extends CordovaPlugin {
                 currentEditingImage = BitmapFactory.decodeFile(pathOrData);
                 editingGPUImage.setImage(currentEditingImage);
 
-                float ratio = (float)screenSize.getWidth() / (float)currentEditingImage.getWidth();
+                float ratio = (float) screenSize.getWidth() / (float) currentEditingImage.getWidth();
                 Size newSize = new Size(Math.round(currentEditingImage.getWidth() * ratio), Math.round(currentEditingImage.getHeight() * ratio));
                 currentPreviewImage = Bitmap.createScaledBitmap(currentEditingImage, newSize.getWidth(), newSize.getHeight(), false);
                 previewGPUImage.setImage(currentPreviewImage);
@@ -133,13 +135,12 @@ public class ImageFilter extends CordovaPlugin {
                 currentEditingImage = base64ToBitmap(pathOrData);
                 editingGPUImage.setImage(currentEditingImage);
 
-                float ratio = (float)screenSize.getWidth() / (float)currentEditingImage.getWidth();
+                float ratio = (float) screenSize.getWidth() / (float) currentEditingImage.getWidth();
                 Size newSize = new Size(Math.round(currentEditingImage.getWidth() * ratio), Math.round(currentEditingImage.getHeight() * ratio));
                 currentPreviewImage = Bitmap.createScaledBitmap(currentEditingImage, newSize.getWidth(), newSize.getHeight(), false);
                 previewGPUImage.setImage(currentPreviewImage);
             }
-        }
-        else {
+        } else {
             this.callbackContext.error("something wrong while passing isBase64Image value");
         }
     }
@@ -174,30 +175,94 @@ public class ImageFilter extends CordovaPlugin {
         }).start();
     }
 
-    private Bitmap applyAgedEffect(GPUImage bmp) {
-        GPUImageSaturationFilter saturationFilter = new GPUImageSaturationFilter();
-        saturationFilter.setSaturation(1.26288f);
-        GPUImageGammaFilter gammaFilter = new GPUImageGammaFilter();
-        gammaFilter.setGamma(1.14433f);
-        GPUImageContrastFilter contrastFilter = new GPUImageContrastFilter();
-        contrastFilter.setContrast(1.2577f);
-        GPUImageExposureFilter exposureFilter = new GPUImageExposureFilter();
-        exposureFilter.setExposure(0.4381f);
-        GPUImageHueFilter hueFilter = new GPUImageHueFilter();
-        hueFilter.setHue(0.2758f);
-        GPUImageSharpenFilter sharpen = new GPUImageSharpenFilter();
-        sharpen.setSharpness(-0.8453f);
+    private Bitmap applyAgedEffect(GPUImage img) {
+        return this.applyFilter(img, 0.00516f, 0.04124f, 0.8763f, 0.7474f, 0.1804f, 1.0103f,
+                NOT_AVAILABLE, 0.7835f, 0.719f, 0.616f);
+    }
 
-        GPUImageFilterGroup filterGroup = new GPUImageFilterGroup();
-        filterGroup.addFilter(saturationFilter);
-        filterGroup.addFilter(gammaFilter);
-        filterGroup.addFilter(contrastFilter);
-        filterGroup.addFilter(exposureFilter);
-        filterGroup.addFilter(hueFilter);
-        filterGroup.addFilter(sharpen);
+    private Bitmap applyBlackWhiteEffect(GPUImage img) {
+        return this.applyFilter(img, 0.0f, NOT_AVAILABLE, NOT_AVAILABLE, 1.2282f, 0.2062f, 0.268f,
+                NOT_AVAILABLE, NOT_AVAILABLE, NOT_AVAILABLE, NOT_AVAILABLE);
+    }
 
-        bmp.setFilter(filterGroup);
-        return bmp.getBitmapWithFilterApplied();
+    private Bitmap applyRosyEffect(GPUImage img) {
+        return this.applyFilter(img, 0.7526f, -0.15722f, 0.8454f, 0.897f, 0.634f, -0.058f,
+                NOT_AVAILABLE, 0.9665f, 0.75f, 0.8428f);
+    }
+
+    private Bitmap applyIntenseEffect(GPUImage img) {
+        return this.applyFilter(img, 2f, NOT_AVAILABLE, NOT_AVAILABLE, NOT_AVAILABLE, 0.12371f,
+                NOT_AVAILABLE, NOT_AVAILABLE, NOT_AVAILABLE, NOT_AVAILABLE, NOT_AVAILABLE);
+    }
+
+    private Bitmap applyWarmEffect(GPUImage img) {
+        return this.applyFilter(img, 1.2577f, -0.085f, 0.964f, 0.8763f, 0.4536f,
+                NOT_AVAILABLE, NOT_AVAILABLE, 0.83f, 0.8092f, 0.7938f);
+    }
+
+    private Bitmap applyLightEffect(GPUImage img) {
+        return this.applyFilter(img, 1.4484f, -0.0592f, 0.7629f, 0.7835f, 0.4124f, -0.0825f,
+                NOT_AVAILABLE, NOT_AVAILABLE, NOT_AVAILABLE, NOT_AVAILABLE);
+    }
+
+    private Bitmap applyColdEffect(GPUImage img) {
+        return this.applyFilter(img, NOT_AVAILABLE, NOT_AVAILABLE, NOT_AVAILABLE, NOT_AVAILABLE, NOT_AVAILABLE, NOT_AVAILABLE,
+                NOT_AVAILABLE, NOT_AVAILABLE, NOT_AVAILABLE, NOT_AVAILABLE);
+    }
+
+    private Bitmap applyFilter(GPUImage img, float saturation, float brightness, float contrast, float gamma, float exposure, float sharpen, float hue,
+                               float red, float green, float blue) {
+
+        GPUImageFilterGroup group = new GPUImageFilterGroup();
+
+        if (saturation != NOT_AVAILABLE) {
+            GPUImageSaturationFilter saturationFilter = new GPUImageSaturationFilter();
+            saturationFilter.setSaturation(saturation);
+            group.addFilter(saturationFilter);
+        }
+        if (brightness != NOT_AVAILABLE) {
+            GPUImageBrightnessFilter brightnessFilter = new GPUImageBrightnessFilter();
+            brightnessFilter.setBrightness(brightness);
+            group.addFilter(brightnessFilter);
+        }
+        if (contrast != NOT_AVAILABLE) {
+            GPUImageContrastFilter contrastFilter = new GPUImageContrastFilter();
+            contrastFilter.setContrast(contrast);
+            group.addFilter(contrastFilter);
+        }
+        if (gamma != NOT_AVAILABLE) {
+            GPUImageGammaFilter gammaFilter = new GPUImageGammaFilter();
+            gammaFilter.setGamma(gamma);
+            group.addFilter(gammaFilter);
+        }
+        if (exposure != NOT_AVAILABLE) {
+            GPUImageExposureFilter exposureFilter = new GPUImageExposureFilter();
+            exposureFilter.setExposure(exposure);
+            group.addFilter(exposureFilter);
+        }
+        if (sharpen != NOT_AVAILABLE) {
+            GPUImageSharpenFilter sharpenFilter = new GPUImageSharpenFilter();
+            sharpenFilter.setSharpness(sharpen);
+            group.addFilter(sharpenFilter);
+        }
+        if (hue != NOT_AVAILABLE) {
+            GPUImageHueFilter hueFilter = new GPUImageHueFilter();
+            hueFilter.setHue(hue);
+            group.addFilter(hueFilter);
+        }
+        if (red != NOT_AVAILABLE || green != NOT_AVAILABLE || blue != NOT_AVAILABLE) {
+            GPUImageRGBFilter rgbFilter = new GPUImageRGBFilter();
+            if (red != NOT_AVAILABLE)
+                rgbFilter.setRed(red);
+            if (green != NOT_AVAILABLE)
+                rgbFilter.setGreen(green);
+            if (blue != NOT_AVAILABLE)
+                rgbFilter.setBlue(blue);
+            group.addFilter(rgbFilter);
+        }
+
+        img.setFilter(group);
+        return img.getBitmapWithFilterApplied();
     }
 
     public void failPicture(String err) {
