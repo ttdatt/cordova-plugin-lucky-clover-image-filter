@@ -1,6 +1,6 @@
 {
   "name": "cordova-plugin-sts-image-filter",
-  "version": "0.0.33",
+  "version": "0.0.34",
   "description": "",
   "cordova": {
     "id": "cordova-plugin-sts-image-filter",
