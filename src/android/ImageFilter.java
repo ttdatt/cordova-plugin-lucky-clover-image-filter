@@ -84,10 +84,12 @@ public class ImageFilter extends CordovaPlugin {
     private static String base64Image;
     private static Bitmap currentPreviewImage;
     private static Bitmap currentEditingImage;
+    private static Bitmap currentThumbnailImage;
     private static GPUImage editingGPUImage;
     private static GPUImage previewGPUImage;
+    private static GPUImage thumbnailGPUImage;
 
-    private GLSurfaceView glSurfaceView;
+    //    private GLSurfaceView glSurfaceView;
     private static MySize screenSize;
 
     private static Context context;
@@ -106,9 +108,10 @@ public class ImageFilter extends CordovaPlugin {
         int width = displayMetrics.widthPixels;
         screenSize = new MySize(width, height);
 
-        glSurfaceView = new GLSurfaceView(context);
+//        glSurfaceView = new GLSurfaceView(context);
         editingGPUImage = new GPUImage(context);
         previewGPUImage = new GPUImage(context);
+        thumbnailGPUImage = new GPUImage(context);
 //        editingGPUImage.setGLSurfaceView(glSurfaceView);
     }
 
@@ -122,7 +125,9 @@ public class ImageFilter extends CordovaPlugin {
 //            this.coolMethod(message, callbackContext);
             return true;
         }
-        if (action.equals("applyEffect") || action.equals("applyEffectForReview")) {
+        if (action.equals("applyEffect")
+                || action.equals("applyEffectForReview")
+                || action.equals("applyEffectForThumbnail")) {
             String path = args.getString(0);
             String filterType = args.getString(1);
             double compressQuality = args.getDouble(2);
@@ -132,6 +137,10 @@ public class ImageFilter extends CordovaPlugin {
                 this.applyEffect(path, filterType, compressQuality, isBase64Image, callbackContext);
             else if (action.equals("applyEffectForReview"))
                 this.applyEffectForReview(path, filterType, compressQuality, isBase64Image, callbackContext);
+            else if (action.equals("applyEffectForThumbnail"))
+                this.applyEffectForThumbnail(path, filterType, compressQuality, isBase64Image, callbackContext);
+
+            return true;
         }
         return false;
     }
@@ -154,6 +163,10 @@ public class ImageFilter extends CordovaPlugin {
                 MySize newSize = new MySize(Math.round(currentEditingImage.getWidth() * ratio), Math.round(currentEditingImage.getHeight() * ratio));
                 currentPreviewImage = Bitmap.createScaledBitmap(currentEditingImage, newSize.getWidth(), newSize.getHeight(), false);
                 previewGPUImage.setImage(currentPreviewImage);
+
+                MySize thumbSize = new MySize(Math.round(currentPreviewImage.getWidth() * 0.2f), Math.round(currentPreviewImage.getHeight() * 0.2f));
+                currentThumbnailImage = Bitmap.createScaledBitmap(currentPreviewImage, thumbSize.getWidth(), thumbSize.getHeight(), false);
+                thumbnailGPUImage.setImage(currentThumbnailImage);
             }
         } else if (isBase64Image == 1) {
             if (!StringUtils.isEmpty(pathOrData) && !StringUtils.isEmpty(filterType)
@@ -167,6 +180,10 @@ public class ImageFilter extends CordovaPlugin {
                 MySize newSize = new MySize(Math.round(currentEditingImage.getWidth() * ratio), Math.round(currentEditingImage.getHeight() * ratio));
                 currentPreviewImage = Bitmap.createScaledBitmap(currentEditingImage, newSize.getWidth(), newSize.getHeight(), false);
                 previewGPUImage.setImage(currentPreviewImage);
+
+                MySize thumbSize = new MySize(Math.round(currentPreviewImage.getWidth() * 0.2f), Math.round(currentPreviewImage.getHeight() * 0.2f));
+                currentThumbnailImage = Bitmap.createScaledBitmap(currentPreviewImage, thumbSize.getWidth(), thumbSize.getHeight(), false);
+                thumbnailGPUImage.setImage(currentThumbnailImage);
             }
         } else {
             this.callbackContext.error("something wrong while passing isBase64Image value");
@@ -199,6 +216,7 @@ public class ImageFilter extends CordovaPlugin {
     private void applyEffectForReview(String pathOrData, final String filterType, final double compressQuality, int isBase64Image, CallbackContext callbackContext) {
         synchronized (this) {
             this.validateInput(pathOrData, filterType, isBase64Image);
+
             Bitmap bmp = null;
             if (filterType.equals("aged"))
                 bmp = applyAgedEffect(previewGPUImage);
@@ -214,6 +232,30 @@ public class ImageFilter extends CordovaPlugin {
                 bmp = applyWarmEffect(previewGPUImage);
             else if (filterType.equals("light"))
                 bmp = applyLightEffect(previewGPUImage);
+
+            processPicture(bmp, (float) compressQuality, JPEG);
+        }
+    }
+
+    private void applyEffectForThumbnail(String pathOrData, final String filterType, final double compressQuality, int isBase64Image, CallbackContext callbackContext) {
+        synchronized (this) {
+            this.validateInput(pathOrData, filterType, isBase64Image);
+
+            Bitmap bmp = null;
+            if (filterType.equals("aged"))
+                bmp = applyAgedEffect(thumbnailGPUImage);
+            else if (filterType.equals("blackWhite"))
+                bmp = applyBlackWhiteEffect(thumbnailGPUImage);
+            else if (filterType.equals("cold"))
+                bmp = applyColdEffect(thumbnailGPUImage);
+            else if (filterType.equals("rosy"))
+                bmp = applyRosyEffect(thumbnailGPUImage);
+            else if (filterType.equals("intense"))
+                bmp = applyIntenseEffect(thumbnailGPUImage);
+            else if (filterType.equals("warm"))
+                bmp = applyWarmEffect(thumbnailGPUImage);
+            else if (filterType.equals("light"))
+                bmp = applyLightEffect(thumbnailGPUImage);
 
             processPicture(bmp, (float) compressQuality, JPEG);
         }
