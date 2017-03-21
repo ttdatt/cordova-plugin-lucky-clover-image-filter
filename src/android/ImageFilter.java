@@ -18,7 +18,7 @@ import java.io.ByteArrayOutputStream;
 
 import android.graphics.Bitmap.*;
 import android.util.DisplayMetrics;
-import android.util.Size;
+//import android.util.Size;
 
 
 import jp.co.cyberagent.android.gpuimage.*;
@@ -47,6 +47,32 @@ import jp.co.cyberagent.android.gpuimage.*;
 //    }
 //}
 
+class MySize {
+    public MySize(int width, int height) {
+        this.width = width;
+        this.height = height;
+    }
+
+    public int getHeight() {
+        return height;
+    }
+
+    public void setHeight(int height) {
+        this.height = height;
+    }
+
+    public int getWidth() {
+        return width;
+    }
+
+    public void setWidth(int width) {
+        this.width = width;
+    }
+
+    private int width;
+    private int height;
+}
+
 public class ImageFilter extends CordovaPlugin {
 
     private static final int JPEG = 0;
@@ -62,7 +88,7 @@ public class ImageFilter extends CordovaPlugin {
     private static GPUImage previewGPUImage;
 
     private GLSurfaceView glSurfaceView;
-    private static Size screenSize;
+    private static MySize screenSize;
 
     private static Context context;
 
@@ -78,7 +104,7 @@ public class ImageFilter extends CordovaPlugin {
         this.cordova.getActivity().getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
         int height = displayMetrics.heightPixels;
         int width = displayMetrics.widthPixels;
-        screenSize = new Size(width, height);
+        screenSize = new MySize(width, height);
 
         glSurfaceView = new GLSurfaceView(context);
         editingGPUImage = new GPUImage(context);
@@ -125,7 +151,7 @@ public class ImageFilter extends CordovaPlugin {
                 editingGPUImage.setImage(currentEditingImage);
 
                 float ratio = (float) screenSize.getWidth() / (float) currentEditingImage.getWidth();
-                Size newSize = new Size(Math.round(currentEditingImage.getWidth() * ratio), Math.round(currentEditingImage.getHeight() * ratio));
+                MySize newSize = new MySize(Math.round(currentEditingImage.getWidth() * ratio), Math.round(currentEditingImage.getHeight() * ratio));
                 currentPreviewImage = Bitmap.createScaledBitmap(currentEditingImage, newSize.getWidth(), newSize.getHeight(), false);
                 previewGPUImage.setImage(currentPreviewImage);
             }
@@ -138,7 +164,7 @@ public class ImageFilter extends CordovaPlugin {
                 editingGPUImage.setImage(currentEditingImage);
 
                 float ratio = (float) screenSize.getWidth() / (float) currentEditingImage.getWidth();
-                Size newSize = new Size(Math.round(currentEditingImage.getWidth() * ratio), Math.round(currentEditingImage.getHeight() * ratio));
+                MySize newSize = new MySize(Math.round(currentEditingImage.getWidth() * ratio), Math.round(currentEditingImage.getHeight() * ratio));
                 currentPreviewImage = Bitmap.createScaledBitmap(currentEditingImage, newSize.getWidth(), newSize.getHeight(), false);
                 previewGPUImage.setImage(currentPreviewImage);
             }
