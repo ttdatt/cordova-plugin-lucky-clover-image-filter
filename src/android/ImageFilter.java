@@ -207,7 +207,7 @@ public class ImageFilter extends CordovaPlugin {
             else if (filterType.equals("light"))
                 bmp = applyLightEffect(editingGPUImage);
 
-            processPicture(bmp, (float) compressQuality, JPEG);
+            processPicture(bmp, (float) compressQuality, JPEG, callbackContext);
         }
     }
 
@@ -234,17 +234,16 @@ public class ImageFilter extends CordovaPlugin {
             else if (filterType.equals("light"))
                 bmp = applyLightEffect(previewGPUImage);
 
-            processPicture(bmp, (float) compressQuality, JPEG);
+            processPicture(bmp, (float) compressQuality, JPEG, callbackContext);
         }
     }
 
-    private void applyEffectForThumbnail(final String pathOrData, final String filterType, final double compressQuality, final int isBase64Image, CallbackContext callbackContext) {
-//        synchronized (this) {
+    private void applyEffectForThumbnail(final String pathOrData, final String filterType, final double compressQuality, final int isBase64Image, final CallbackContext callbackContext) {
+        validateInput(pathOrData, filterType, isBase64Image);
 
         new Thread(new Runnable() {
             @Override
             public void run() {
-                validateInput(pathOrData, filterType, isBase64Image);
                 Bitmap thumb = getThumbnailImage();
                 Bitmap bmp = null;
                 GPUImage thumbnailGPUImage = new GPUImage(context);
@@ -265,10 +264,9 @@ public class ImageFilter extends CordovaPlugin {
                 else if (filterType.equals("light"))
                     bmp = applyLightEffect(thumbnailGPUImage);
 
-                processPicture(bmp, (float) compressQuality, JPEG);
+                processPicture(bmp, (float) compressQuality, JPEG, callbackContext);
             }
         }).start();
-//        }
     }
 
     private Bitmap applyAgedEffect(GPUImage img) {
@@ -365,7 +363,7 @@ public class ImageFilter extends CordovaPlugin {
         this.callbackContext.error(err);
     }
 
-    private void processPicture(Bitmap bitmap, float compressQuality, int encodingType) {
+    private void processPicture(Bitmap bitmap, float compressQuality, int encodingType, CallbackContext callbackContext) {
         synchronized (this) {
             ByteArrayOutputStream jpeg_data = new ByteArrayOutputStream();
             CompressFormat compressFormat = encodingType == JPEG ?
@@ -377,7 +375,7 @@ public class ImageFilter extends CordovaPlugin {
                     byte[] code = jpeg_data.toByteArray();
                     byte[] output = Base64.encode(code, Base64.NO_WRAP);
                     String js_out = new String(output);
-                    this.callbackContext.success(js_out);
+                    callbackContext.success(js_out);
                     js_out = null;
                     output = null;
                     code = null;
