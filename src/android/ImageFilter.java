@@ -149,9 +149,7 @@ public class ImageFilter extends CordovaPlugin {
                 currentImagePath = pathOrData;
                 pathOrData = pathOrData.substring(7);
 
-                BitmapFactory.Options options = new BitmapFactory.Options();
-                options.inSampleSize = 8;
-                currentEditingImage = BitmapFactory.decodeFile(pathOrData, options);
+                currentEditingImage = BitmapFactory.decodeFile(pathOrData);
 
                 float ratio = (float) screenSize.getWidth() / (float) currentEditingImage.getWidth();
                 MySize newSize = new MySize(Math.round(currentEditingImage.getWidth() * ratio), Math.round(currentEditingImage.getHeight() * ratio));
