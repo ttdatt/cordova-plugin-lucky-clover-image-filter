@@ -1,0 +1,6 @@
+framework module MyGPUFramework {
+  umbrella header "MyGPUFramework.h"
+
+  export *
+  module * { export * }
+}
